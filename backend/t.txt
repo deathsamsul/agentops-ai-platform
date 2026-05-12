@@ -1,0 +1,47 @@
+Start first with only these:
+
+backend/app/main.py
+backend/app/agents/
+backend/app/tools/
+backend/app/models/
+backend/app/schemas/
+frontend/streamlit_app.py
+docker-compose.yml
+
+
+# ── Web framework ─────────────────────────────────────────────────────────────
+fastapi>=0.115.0
+uvicorn[standard]>=0.30.0
+python-multipart>=0.0.9
+
+# ── Settings / validation ─────────────────────────────────────────────────────
+pydantic>=2.7.0
+pydantic-settings>=2.3.0
+
+# ── LangGraph + LangChain ─────────────────────────────────────────────────────
+langgraph>=0.2.0
+langchain>=0.3.0
+langchain-core>=0.3.0
+
+# ── LLM providers (install only what you need) ────────────────────────────────
+langchain-openai>=0.2.0          # for OpenAI / GPT-4o
+langchain-anthropic>=0.2.0       # for Claude
+langchain-ollama>=0.2.0          # for local Ollama models
+
+# ── Database (Phase 2) ────────────────────────────────────────────────────────
+# asyncpg>=0.29.0
+# sqlalchemy[asyncio]>=2.0.0
+# alembic>=1.13.0
+
+# ── RAG / Embeddings (Phase 4) ───────────────────────────────────────────────
+# sentence-transformers>=3.0.0
+# pgvector>=0.3.0
+
+# ── Frontend ──────────────────────────────────────────────────────────────────
+streamlit>=1.37.0
+requests>=2.32.0
+
+# ── Dev / testing ─────────────────────────────────────────────────────────────
+pytest>=8.0.0
+httpx>=0.27.0           # async HTTP client for tests
+python-dotenv>=1.0.0

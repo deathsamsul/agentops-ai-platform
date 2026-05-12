@@ -1,0 +1,245 @@
+"""
+agents/nodes.py — Individual nodes that make up the LangGraph workflow.
+
+Each function is a graph node:
+    def my_node(state: AgentState) -> AgentState:
+        ...
+        return updated_state
+
+Node responsibilities:
+  planner_node    — calls the LLM, decides: reply directly OR call a tool
+  executor_node   — runs the tool chosen by the planner
+  approval_node   — pauses workflow and waits for human approval
+  responder_node  — formats the final answer back to the user
+"""
+
+from __future__ import annotations
+
+import json
+import logging
+import uuid
+from typing import Any
+
+from langchain_core.messages import AIMessage, HumanMessage, ToolMessage
+
+from app.agents.state import AgentState
+from app.tools.executor import executor
+
+logger = logging.getLogger(__name__)
+
+
+# ─── Helper: build LLM with tools ────────────────────────────────────────────
+def _get_llm_with_tools():
+    """
+    Returns a LangChain chat model bound to our tool schemas.
+
+    Supports OpenAI, Anthropic, and Ollama — controlled by config.
+    """
+    from app.config import settings
+
+    tool_schemas = executor.tool_schemas()
+
+    if settings.MODEL_PROVIDER == "openai":
+        from langchain_openai import ChatOpenAI
+        llm = ChatOpenAI(
+            model=settings.LLM_MODEL,
+            api_key=settings.OPENAI_API_KEY,
+        )
+    elif settings.MODEL_PROVIDER == "anthropic":
+        from langchain_anthropic import ChatAnthropic
+        llm = ChatAnthropic(
+            model=settings.LLM_MODEL,
+            api_key=settings.ANTHROPIC_API_KEY,
+        )
+    elif settings.MODEL_PROVIDER == "ollama":
+        from langchain_ollama import ChatOllama
+        llm = ChatOllama(
+            model=settings.LLM_MODEL,
+            base_url=settings.OLLAMA_BASE_URL,
+        )
+    else:
+        raise ValueError(f"Unsupported MODEL_PROVIDER: {settings.MODEL_PROVIDER}")
+
+    # Bind tool schemas so the LLM knows what tools it can call
+    return llm.bind_tools(tool_schemas)
+
+
+# ─── Node 1: Planner ─────────────────────────────────────────────────────────
+def planner_node(state: AgentState) -> dict[str, Any]:
+    """
+    Sends conversation history to the LLM.
+    The LLM either:
+      a) Replies directly (no tool needed) → sets agent_reply
+      b) Decides to call a tool           → sets next_tool + next_tool_input
+    """
+    logger.info("[planner] iteration=%d user='%s'", state.iteration, state.user_input[:60])
+
+    llm = _get_llm_with_tools()
+
+    # Build message list: system prompt + conversation history + current user message
+    from langchain_core.messages import SystemMessage
+    system = SystemMessage(content=_system_prompt())
+    messages = [system] + list(state.messages)
+
+    response: AIMessage = llm.invoke(messages)
+
+    # Did the LLM request a tool call?
+    if response.tool_calls:
+        tool_call = response.tool_calls[0]   # handle one tool per iteration
+        logger.info("[planner] → tool call: %s", tool_call["name"])
+        return {
+            "messages": [response],
+            "next_tool": tool_call["name"],
+            "next_tool_input": tool_call["args"],
+            "iteration": state.iteration + 1,
+        }
+
+    # Direct reply
+    logger.info("[planner] → direct reply")
+    return {
+        "messages": [response],
+        "agent_reply": response.content,
+        "next_tool": None,
+        "next_tool_input": {},
+    }
+
+
+# ─── Node 2: Executor ────────────────────────────────────────────────────────
+def executor_node(state: AgentState) -> dict[str, Any]:
+    """
+    Runs the tool that the planner selected.
+    Records the result in tool_calls and appends a ToolMessage to history.
+    """
+    tool_name = state.next_tool
+    tool_input = state.next_tool_input
+
+    logger.info("[executor] running tool '%s'", tool_name)
+
+    result = executor.execute(tool_name, tool_input)
+
+    tool_record = {
+        "tool_name": tool_name,
+        "input_data": tool_input,
+        "output": result,
+        "success": result.get("status") == "ok",
+    }
+
+    # Append ToolMessage so the LLM can see what the tool returned
+    tool_msg = ToolMessage(
+        content=json.dumps(result),
+        tool_call_id=str(uuid.uuid4()),
+        name=tool_name,
+    )
+
+    # Does this tool output require human approval before proceeding?
+    requires_approval = result.get("requires_approval", False)
+    approval_token = str(uuid.uuid4()) if requires_approval else None
+
+    return {
+        "messages": [tool_msg],
+        "tool_calls": [tool_record],
+        "next_tool": None,
+        "next_tool_input": {},
+        "requires_approval": requires_approval,
+        "approval_token": approval_token,
+    }
+
+
+# ─── Node 3: Approval gate ───────────────────────────────────────────────────
+def approval_node(state: AgentState) -> dict[str, Any]:
+    """
+    Pauses the workflow and signals the frontend that human approval is needed.
+
+    In Phase 3 you will wire this to a real approval service (database +
+    webhook or WebSocket push). For now it simply records the pause.
+    """
+    logger.info("[approval] waiting for human approval token=%s", state.approval_token)
+
+    # The graph will terminate here and the API returns requires_approval=True.
+    # The frontend calls POST /api/approve with the token to resume.
+    return {
+        "agent_reply": (
+            "⏸ I need your approval before proceeding. "
+            f"Please review the planned action and confirm. (token: {state.approval_token})"
+        ),
+    }
+
+
+# ─── Node 4: Responder ───────────────────────────────────────────────────────
+def responder_node(state: AgentState) -> dict[str, Any]:
+    """
+    Called when the agent has finished all tool calls and needs to produce
+    a final, user-facing summary.
+
+    Asks the LLM to summarise what was done, combining tool results.
+    """
+    logger.info("[responder] generating final reply")
+
+    if state.agent_reply:
+        # Planner already produced a direct reply — nothing to do
+        return {}
+
+    llm = _get_llm_with_tools()
+    from langchain_core.messages import SystemMessage
+
+    summary_prompt = SystemMessage(content=(
+        "You are summarising completed actions for the user. "
+        "Based on the conversation and tool results, write a concise, friendly reply "
+        "explaining what was done. Highlight any items awaiting approval."
+    ))
+
+    response: AIMessage = llm.invoke([summary_prompt] + list(state.messages))
+    return {
+        "messages": [response],
+        "agent_reply": response.content,
+    }
+
+
+# ─── Routing function (used by graph.py) ─────────────────────────────────────
+def should_continue(state: AgentState) -> str:
+    """
+    Decides which node to visit after the planner runs.
+
+    Returns one of the edge keys defined in graph.py:
+      "execute"   — planner chose a tool
+      "approve"   — tool result needs human approval
+      "end"       — done, produce final reply
+    """
+    if state.iteration >= state.max_iterations:
+        logger.warning("[router] max iterations reached, forcing end")
+        return "end"
+
+    if state.next_tool:
+        return "execute"
+
+    return "end"
+
+
+def after_executor(state: AgentState) -> str:
+    """Decides what happens after a tool runs."""
+    if state.requires_approval:
+        return "approve"
+    if state.iteration < state.max_iterations:
+        # Go back to planner so it can call more tools or compose final reply
+        return "plan"
+    return "end"
+
+
+# ─── System prompt ────────────────────────────────────────────────────────────
+def _system_prompt() -> str:
+    return """You are an Enterprise AI Agent — a powerful assistant that can take actions on behalf of the user.
+
+You have access to tools for:
+- Sending emails (always draft first, never send without approval)
+- Scheduling calendar meetings
+- Creating and managing tasks
+- Searching internal documents (RAG)
+- Booking resources
+
+Operating rules:
+1. PLAN → ASK FOR CONFIRMATION → EXECUTE. Never take risky actions automatically.
+2. When you call a tool, be precise with the parameters.
+3. If you are unsure about a parameter, ask the user before calling the tool.
+4. After calling tools, summarise what was done in clear, plain language.
+5. Be concise. Enterprise users are busy.
+"""
