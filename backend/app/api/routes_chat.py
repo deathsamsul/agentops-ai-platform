@@ -19,14 +19,13 @@ Endpoints:
 This file is intentionally thin. Business logic lives in the agent graph
 and services, not here.
 """
-
+# TODO real approval, you need storage _pending_approvals = {}
 # TODO use uuid4 for session id
 # TODO add authentication and associate sessions with users
 # TODO async function with await if langgraph supports async execution in the future
+# TODO ainvoke should be async final_state = await agent_graph.ainvoke(initial_state)
 
-
-
-logger = logging.getLogger(__name__)
+logger = logging.getLogger(__name__)   # name means python file name  app.api.routes_chat
 router = APIRouter()
 
 # In-memory session store — replace with PostgreSQL in Phase 2
@@ -91,6 +90,7 @@ async def get_history(session_id: str):
 # fetch conversation history for a session This converts LangChain message objects into simple JSON structures with "role" and "content" for the frontend to display.
     """Return conversation history for a session."""
     messages = _sessions.get(session_id, [])
+    # TODO role = "human" if isinstance(m, HumanMessage) else "assistant"
     history = [
         {"role": "human" if m.__class__.__name__ == "HumanMessage" else "assistant",
          "content": m.content}
@@ -110,7 +110,7 @@ async def approve_action(approval_token: str, approved: bool, session_id: str):
     """
     logger.info("Approval decision: token=%s approved=%s session=%s",
                 approval_token, approved, session_id)
-
+# For real app, need store pending approvals somewhere use LangGraph checkpointer
     # TODO Phase 3: resume the paused workflow using LangGraph checkpointer
     return {
         "approval_token": approval_token,
