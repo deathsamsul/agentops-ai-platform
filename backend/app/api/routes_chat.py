@@ -10,7 +10,6 @@ from app.schemas.chat_schema import ChatRequest, ChatResponse, ToolCall
 
 """
 api/routes_chat.py — FastAPI router for chat endpoints.
-
 Endpoints:
   POST /api/chat           — send a message, get agent reply
   GET  /api/history/{sid} — fetch conversation history for a session
@@ -19,6 +18,7 @@ Endpoints:
 This file is intentionally thin. Business logic lives in the agent graph
 and services, not here.
 """
+
 # TODO real approval, you need storage _pending_approvals = {}
 # TODO use uuid4 for session id
 # TODO add authentication and associate sessions with users
@@ -36,7 +36,6 @@ _sessions: dict[str, list] = {}
 async def chat(request: ChatRequest) -> ChatResponse:
     """
     Main chat endpoint.
-
     Flow:
       1. Build AgentState from the request
       2. Run the LangGraph agent graph
@@ -52,8 +51,8 @@ async def chat(request: ChatRequest) -> ChatResponse:
         messages=history + [HumanMessage(content=request.user_input)],     # HumanMessage represents a message sent by the user/human to an AI model
         session_id=request.session_id,                                     # LangChain stores that as a HumanMessage.
         user_id=request.user_id,
-        user_input=request.message,
-    )
+        user_input=request.message,)
+
 
     # Run the agent graph
     try:

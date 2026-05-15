@@ -1,3 +1,11 @@
+from __future__ import annotations
+from typing import Any, Annotated
+from operator import add        # used by LangGraph to merge list fields
+from langgraph.graph import add_messages
+from langchain_core.messages import BaseMessage
+from pydantic import BaseModel, Field
+
+
 """
 agents/state.py — LangGraph agent state schema.
 
@@ -7,16 +15,8 @@ Each node reads from it and writes back to it.
 Think of it as the agent's working memory for one conversation turn.
 """
 
-from __future__ import annotations
 
-from typing import Any, Annotated
-from operator import add        # used by LangGraph to merge list fields
-
-from langgraph.graph import add_messages
-from langchain_core.messages import BaseMessage
-from pydantic import BaseModel, Field
-
-
+# TODO With checkpointer + thread_id 
 class AgentState(BaseModel):
     """
     Shared state threaded through every node of the LangGraph workflow.
@@ -61,4 +61,5 @@ class AgentState(BaseModel):
     error: str | None = None
 
     class Config:
-        arbitrary_types_allowed = True   # needed for LangChain BaseMessage
+        arbitrary_types_allowed = True   # needed for LangChain BaseMessage ,It allows non-normal Python/Pydantic types is a LangChain object, not a simple type like string/int/list.
+        
