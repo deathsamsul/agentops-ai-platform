@@ -1,11 +1,20 @@
+from __future__ import annotations
+import json
+import logging
+import uuid
+from typing import Any
+from langchain_core.messages import AIMessage, HumanMessage, ToolMessage
+from app.agents.state import AgentState
+from app.tools.executor import executor
+
+
+
 """
 agents/nodes.py — Individual nodes that make up the LangGraph workflow.
-
 Each function is a graph node:
     def my_node(state: AgentState) -> AgentState:
         ...
         return updated_state
-
 Node responsibilities:
   planner_node    — calls the LLM, decides: reply directly OR call a tool
   executor_node   — runs the tool chosen by the planner
@@ -13,26 +22,16 @@ Node responsibilities:
   responder_node  — formats the final answer back to the user
 """
 
-from __future__ import annotations
 
-import json
-import logging
-import uuid
-from typing import Any
 
-from langchain_core.messages import AIMessage, HumanMessage, ToolMessage
 
-from app.agents.state import AgentState
-from app.tools.executor import executor
-
-logger = logging.getLogger(__name__)
+logger = logging.getLogger(__name__)   # set up a logger for this module example 
 
 
 # ─── Helper: build LLM with tools ────────────────────────────────────────────
 def _get_llm_with_tools():
     """
     Returns a LangChain chat model bound to our tool schemas.
-
     Supports OpenAI, Anthropic, and Ollama — controlled by config.
     """
     from app.config import settings
