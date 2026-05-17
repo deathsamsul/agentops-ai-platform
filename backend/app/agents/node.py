@@ -22,7 +22,7 @@ Node responsibilities:
   responder_node  — formats the final answer back to the user
 """
 
-
+# TODO: In Phase 3, you will expand these nodes with more complex logic, error handling,
 
 
 logger = logging.getLogger(__name__)   # set up a logger for this module example 
@@ -37,9 +37,10 @@ def _get_llm_with_tools():
     from app.config import settings
 
     tool_schemas = executor.tool_schemas()
-
+# TODO need to create llm empty object
+    llm = None
     if settings.MODEL_PROVIDER == "openai":
-        from langchain_openai import ChatOpenAI
+        from langchain_openai import ChatOpenAI  
         llm = ChatOpenAI(
             model=settings.LLM_MODEL,
             api_key=settings.OPENAI_API_KEY,
