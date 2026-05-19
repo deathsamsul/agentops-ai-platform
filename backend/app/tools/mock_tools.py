@@ -38,7 +38,7 @@ class EmailTool(BaseTool):
             "to": to,
             "subject": subject,
             "body": body,
-            "drafted_at": datetime.utcnow().isoformat(),
+            "drafted_at": datetime.utcnow().isoformat(),     # utcnow() is important to show the email is "freshly drafted" each time
         }
         return self.success(
             draft=draft,
