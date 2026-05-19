@@ -1,9 +1,14 @@
+from __future__ import annotations
+from datetime import datetime
+from typing import Any
+from app.tools.base import BaseTool
+
+
+
 """
 tools/mock_tools.py — Simulated tools for Phase 1 development.
-
 These tools return realistic fake responses so you can build and test
 the agent loop WITHOUT needing real email servers, calendar APIs, etc.
-
 Upgrade path:
   - Replace each mock with a real implementation in its own file:
       email_tool.py, calendar_tool.py, postgres_tool.py, rag_tool.py
@@ -11,12 +16,6 @@ Upgrade path:
     needs zero changes.
 """
 
-from __future__ import annotations
-
-from datetime import datetime
-from typing import Any
-
-from app.tools.base import BaseTool
 
 
 # ─── Email Tool ───────────────────────────────────────────────────────────────
