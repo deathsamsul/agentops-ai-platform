@@ -16,16 +16,16 @@ Each function is a graph node:
         ...
         return updated_state
 Node responsibilities:
-  planner_node    — calls the LLM, decides: reply directly OR call a tool
-  executor_node   — runs the tool chosen by the planner
-  approval_node   — pauses workflow and waits for human approval
-  responder_node  — formats the final answer back to the user
+  1.planner_node    — calls the LLM, decides: reply directly OR call a tool
+  2.executor_node   — runs the tool chosen by the planner
+  3.approval_node   — pauses workflow and waits for human approval
+  4.responder_node  — formats the final answer back to the user
 """
 
 # TODO: In Phase 3, you will expand these nodes with more complex logic, error handling,
 
 
-logger = logging.getLogger(__name__)   # set up a logger for this module example 
+logger = logging.getLogger(__name__)   # set up a logger for this module example  app/agents/nodes.py
 
 
 # ─── Helper: build LLM with tools ────────────────────────────────────────────
@@ -85,7 +85,7 @@ def planner_node(state: AgentState) -> dict[str, Any]:
 
     # Did the LLM request a tool call?
     if response.tool_calls:
-        tool_call = response.tool_calls[0]   # handle one tool per iteration
+        tool_call = response.tool_calls[0]   # handle one first tool per iteration
         logger.info("[planner] → tool call: %s", tool_call["name"])
         return {
             "messages": [response],

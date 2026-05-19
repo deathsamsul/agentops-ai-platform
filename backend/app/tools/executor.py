@@ -1,23 +1,22 @@
+from __future__ import annotations
+import logging
+from typing import Any
+from app.tools.registry import registry
+
+
 """
 tools/executor.py — Central controller that runs tools on behalf of the agent.
-
 This is the KEY architectural decision:
 
   Phase 1 (now):    Agent → PythonToolExecutor → Python function in tools/
   Phase 8 (later):  Agent → MCPToolExecutor    → MCP server
-
 The agent only ever calls:
     executor.execute(tool_name, data)
-
 So when you upgrade to MCP, you swap the executor — NOT the agent.
 """
+# TODO in phase 1, paythontoolexecutor will change with mcptollexecutor, but the agent nodes will not. This is the key to making the architecture flexible and future-proof.
 
-from __future__ import annotations
 
-import logging
-from typing import Any
-
-from app.tools.registry import registry
 
 logger = logging.getLogger(__name__)
 
@@ -25,7 +24,6 @@ logger = logging.getLogger(__name__)
 class PythonToolExecutor:
     """
     Executes tools by looking them up in the registry and calling .execute().
-
     This is your Phase 1 executor.
     Later you will add MCPToolExecutor with the same interface.
     """
@@ -33,11 +31,9 @@ class PythonToolExecutor:
     def execute(self, tool_name: str, data: dict[str, Any]) -> dict[str, Any]:
         """
         Run a tool by name.
-
         Args:
             tool_name: Must match a registered BaseTool.name
             data:      Parameters dict forwarded to tool.execute()
-
         Returns:
             Tool result dict (always has "status" key)
         """
@@ -78,14 +74,12 @@ class PythonToolExecutor:
 executor = PythonToolExecutor()
 
 
-# ─── Future MCP executor (scaffold — implement in Phase 8) ───────────────────
+# ─── Future MCP executor (scaffold — implement in Phase 8) ────────────────
 class MCPToolExecutor:
     """
     Calls tools on remote MCP servers instead of local Python functions.
-
     Usage will be identical to PythonToolExecutor:
         result = executor.execute("send_email", data)
-
     Implementation notes (Phase 8):
         - Maintain a map of tool_name → mcp_server_url
         - Use httpx or the official MCP client to call the server

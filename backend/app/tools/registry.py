@@ -1,38 +1,25 @@
+from __future__ import annotations
+from typing import Any
+from app.tools.base import BaseTool
+# ── Import concrete tools here as you build them ─────────────────────────────
+from app.tools.mock_tools import ( EmailTool,CalendarTool,DatabaseTool,BookingTool,SearchDocsTool,)
+
+
+
 """
 tools/registry.py — Maps tool names to tool instances.
-
 The ToolRegistry is the single source of truth for which tools exist.
-
 Usage:
     from app.tools.registry import registry
-
     tool = registry.get("send_email")
     result = tool.execute({"to": "...", "subject": "...", "body": "..."})
-
 Adding a new tool:
     1. Create MyTool(BaseTool) in tools/my_tool.py
     2. Import it here and call registry.register(MyTool())
-
 MCP upgrade path:
     When you switch to MCP servers, register MCPToolWrapper instances
     instead of Python tool instances. The executor/agent code stays the same.
 """
-
-from __future__ import annotations
-
-from typing import Any
-
-from app.tools.base import BaseTool
-
-# ── Import concrete tools here as you build them ─────────────────────────────
-from app.tools.mock_tools import (
-    EmailTool,
-    CalendarTool,
-    DatabaseTool,
-    BookingTool,
-    SearchDocsTool,
-)
-
 
 class ToolRegistry:
     """Holds all registered tool instances, keyed by tool.name."""

@@ -9,7 +9,7 @@ Usage anywhere in the codebase:
 """
 
 # TODO in phase1, create custom llm for all llm providers to use in the future, and move _get_llm_with_tools() to this file as well, so that we can reuse it across the codebase without importing node.py
-
+# TODO in phase 3 add google gemini support api key
 class Settings(BaseSettings):
     # ── LLM ──────────────────────────────────────────────────────────────────
     MODEL_PROVIDER: str = "openai"          # openai | anthropic | ollama  | custom
