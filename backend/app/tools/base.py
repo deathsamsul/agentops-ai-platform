@@ -5,6 +5,8 @@ from typing import Any
 
 
 """
+This code defines a base template for tools. 
+Any tool in your agent must follow the same structure: it must have a name, description, and an execute() method.
 tools/base.py — Common interface every tool must follow.
 Why a base class?
   The agent calls tools via:
@@ -18,18 +20,18 @@ Future MCP upgrade path:
 
 
 
-class BaseTool(ABC):
+class BaseTool(ABC):  # ABC = Abstract Base Class, 
     """
     Every tool MUST define:
       name        — unique snake_case identifier, e.g. "send_email"
-      description — one sentence; the LLM reads this to decide which tool to use
+      description — tells the LLM what the tool does .one sentence; the LLM reads this to decide which tool to use
       execute()   — does the actual work
     """
 
     name: str
     description: str
 
-    @abstractmethod
+    @abstractmethod          # every must define own method 
     def execute(self, data: dict[str, Any]) -> dict[str, Any]:
         """
         Run the tool.
@@ -61,5 +63,5 @@ class BaseTool(ABC):
             "input_schema": {},
         }
 
-    def __repr__(self) -> str:
+    def __repr__(self) -> str:    # 
         return f"<Tool name={self.name!r}>"

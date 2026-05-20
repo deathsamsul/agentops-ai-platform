@@ -16,7 +16,7 @@ Upgrade path:
     needs zero changes.
 """
 
-
+# TODO ; if user send message with approval then directly execute task without asking approval again
 
 # ─── Email Tool ───────────────────────────────────────────────────────────────
 class EmailTool(BaseTool):
