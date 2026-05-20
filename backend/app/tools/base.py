@@ -40,10 +40,9 @@ class BaseTool(ABC):  # ABC = Abstract Base Class,
         Returns:
             Dictionary with at minimum {"status": "ok"|"error", ...result fields...}
         """
-        raise NotImplementedError
+        raise NotImplementedError   # method be written later in subclass, not here
 
     # ── Convenience helpers ───────────────────────────────────────────────────
-
     def success(self, **kwargs) -> dict[str, Any]:
         """Return a standard success payload."""
         return {"status": "ok", "tool": self.name, **kwargs}
