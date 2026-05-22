@@ -61,8 +61,21 @@ def _get_llm_with_tools():
         raise ValueError(f"Unsupported MODEL_PROVIDER: {settings.MODEL_PROVIDER}")
 
     # Bind tool schemas so the LLM knows what tools it can call
-    return llm.bind_tools(tool_schemas)
-
+    return llm.bind_tools(tool_schemas)  # all tools with schemas for llm to know which tools what need and how to call them and work
+'''
+after bind with tools llm object looks like this when you print it in planner_node
+ChatOpenAI(model='gpt-4', temperature=0, api_key='***', 
+llm = {
+    "model": "gpt-4",
+    "can_chat": True,
+    "tools": [
+        {
+            "name": "send_email",
+            "description": "Send email"
+        }
+    ]
+} 
+'''
 
 # ─── Node 1: Planner ─────────────────────────────────────────────────────────
 def planner_node(state: AgentState) -> dict[str, Any]:
