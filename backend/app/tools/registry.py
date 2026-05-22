@@ -7,6 +7,7 @@ from app.tools.mock_tools import ( EmailTool,CalendarTool,DatabaseTool,BookingTo
 
 
 """
+***A registry is like a dictionary/list where all tools are stored by name.***
 tools/registry.py — Maps tool names to tool instances.
 The ToolRegistry is the single source of truth for which tools exist.
 Usage:
@@ -42,9 +43,13 @@ class ToolRegistry:
     def list_names(self) -> list[str]:
         return list(self._tools.keys())
 
-    def all_schemas(self) -> list[dict[str, Any]]:
+    def all_schemas(self) -> list[dict[str, Any]]:   # all avilable tools with schemas for llm to know which tools what need and how to call them and work
         """Return all tool schemas — useful for passing to the LLM."""
-        return [t.schema() for t in self._tools.values()]
+        return [t.schema() for t in self._tools.values()]  # .valuues() only reeurn the value not key
+    # schemas = []
+    # for t in self._tools.values():
+    #    schemas.append(t.schema())
+    # return schemas
 
     def __contains__(self, name: str) -> bool:
         return name in self._tools
