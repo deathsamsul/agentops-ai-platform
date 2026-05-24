@@ -5,17 +5,19 @@ from app.tools.registry import registry
 
 
 """
+Agent does not directly call tools.
+Agent calls executor.
+Executor finds the correct tool and runs it.
 tools/executor.py — Central controller that runs tools on behalf of the agent.
 This is the KEY architectural decision:
-
   Phase 1 (now):    Agent → PythonToolExecutor → Python function in tools/
   Phase 8 (later):  Agent → MCPToolExecutor    → MCP server
 The agent only ever calls:
     executor.execute(tool_name, data)
 So when you upgrade to MCP, you swap the executor — NOT the agent.
 """
-# TODO in phase 1, paythontoolexecutor will change with mcptollexecutor, but the agent nodes will not. This is the key to making the architecture flexible and future-proof.
 
+# TODO in phase 1, paythontoolexecutor will change with mcptollexecutor, but the agent nodes will not. This is the key to making the architecture flexible and future-proof.
 
 
 logger = logging.getLogger(__name__)
@@ -38,7 +40,6 @@ class PythonToolExecutor:
             Tool result dict (always has "status" key)
         """
         logger.info("Executing tool '%s' with input keys: %s", tool_name, list(data.keys()))
-
         try:
             tool = registry.get(tool_name)
             result = tool.execute(data)
