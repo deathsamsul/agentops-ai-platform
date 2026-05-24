@@ -17,6 +17,7 @@ Upgrade path:
 """
 
 # TODO ; if user send message with approval then directly execute task without asking approval again
+# TODO all tools paramter write with better schema with clear instruction This helps LLM understand much better
 
 # ─── Email Tool ───────────────────────────────────────────────────────────────
 class EmailTool(BaseTool):

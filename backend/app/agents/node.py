@@ -10,6 +10,7 @@ from app.tools.executor import executor
 
 
 """
+if if response.tool_calls is empty [] then reply directly 
 agents/nodes.py — Individual nodes that make up the LangGraph workflow.
 Each function is a graph node:
     def my_node(state: AgentState) -> AgentState:
