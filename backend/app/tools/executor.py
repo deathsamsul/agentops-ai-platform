@@ -35,7 +35,7 @@ class PythonToolExecutor:
         Run a tool by name.
         Args:
             tool_name: Must match a registered BaseTool.name
-            data:      Parameters dict forwarded to tool.execute()
+            data:      Parameters dict forwarded to tool.execute() data is only for tools not full agent state full message history
         Returns:
             Tool result dict (always has "status" key)
         """
