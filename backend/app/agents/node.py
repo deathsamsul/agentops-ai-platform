@@ -36,9 +36,7 @@ def _get_llm_with_tools():
     Supports OpenAI, Anthropic, and Ollama — controlled by config.
     """
     from app.config import settings
-
-    tool_schemas = executor.tool_schemas()
-# TODO need to create llm empty object
+    tool_schemas = executor.tool_schemas() # get tool schemas from executor to bind to llm so that llm knows which tools are available and how to call them
     llm = None
     if settings.MODEL_PROVIDER == "openai":
         from langchain_openai import ChatOpenAI  
@@ -79,7 +77,7 @@ llm = {
 '''
 
 # ─── Node 1: Planner ─────────────────────────────────────────────────────────
-def planner_node(state: AgentState) -> dict[str, Any]:
+def planner_node(state: AgentState) -> dict[str, Any]: # Ask LLM: should we reply directly or call a tool?
     """
     Sends conversation history to the LLM.
     The LLM either:
@@ -163,7 +161,6 @@ def executor_node(state: AgentState) -> dict[str, Any]:
 def approval_node(state: AgentState) -> dict[str, Any]:
     """
     Pauses the workflow and signals the frontend that human approval is needed.
-
     In Phase 3 you will wire this to a real approval service (database +
     webhook or WebSocket push). For now it simply records the pause.
     """
