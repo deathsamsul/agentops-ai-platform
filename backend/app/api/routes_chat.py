@@ -17,6 +17,22 @@ Endpoints:
 
 This file is intentionally thin. Business logic lives in the agent graph
 and services, not here.
+
+At first it has:
+old messages + latest user message
+session_id
+user_id
+user_input
+
+Other fields are default:
+agent_reply = ""
+tool_calls = []
+next_tool = None
+next_tool_input = {}
+iteration = 0
+requires_approval = False
+approval_token = None
+error = None
 """
 
 # TODO real approval, you need storage _pending_approvals = {}
