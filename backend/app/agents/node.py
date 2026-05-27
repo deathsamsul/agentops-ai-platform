@@ -117,6 +117,8 @@ def planner_node(state: AgentState) -> dict[str, Any]: # Ask LLM: should we repl
 
 
 # ─── Node 2: Executor ────────────────────────────────────────────────────────
+# TODO : fix this direectly execute without before approval risk for [send_email,delete_task,restart_deployment,book_resource,create_payment]
+# TODO : use two type tool one for safe execution without approval like [search_docs,get_tasks,get_pods] and one for risky action with approval like [send_email,delete_task,restart_deployment,book_resource,create_payment] and if tool is in risky action list then directly execute without asking approval again if user already approved once in this conversation turn
 def executor_node(state: AgentState) -> dict[str, Any]:
     """
     Runs the tool that the planner selected.
