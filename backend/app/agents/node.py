@@ -183,7 +183,6 @@ def responder_node(state: AgentState) -> dict[str, Any]:
     """
     Called when the agent has finished all tool calls and needs to produce
     a final, user-facing summary.
-
     Asks the LLM to summarise what was done, combining tool results.
     """
     logger.info("[responder] generating final reply")
@@ -198,14 +197,12 @@ def responder_node(state: AgentState) -> dict[str, Any]:
     summary_prompt = SystemMessage(content=(
         "You are summarising completed actions for the user. "
         "Based on the conversation and tool results, write a concise, friendly reply "
-        "explaining what was done. Highlight any items awaiting approval."
-    ))
+        "explaining what was done. Highlight any items awaiting approval." ))
 
     response: AIMessage = llm.invoke([summary_prompt] + list(state.messages))
     return {
         "messages": [response],
-        "agent_reply": response.content,
-    }
+        "agent_reply": response.content, }
 
 
 # ─── Routing function (used by graph.py) ─────────────────────────────────────
