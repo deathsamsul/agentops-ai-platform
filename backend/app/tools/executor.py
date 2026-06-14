@@ -42,7 +42,7 @@ class PythonToolExecutor:
         logger.info("Executing tool '%s' with input keys: %s", tool_name, list(data.keys()))
         try:
             tool = registry.get(tool_name)
-            result = tool.execute(data)
+            result = tool.execute(data)  #this executor function is inherite from tool own shemas 
             logger.info("Tool '%s' completed with status: %s", tool_name, result.get("status"))
             return result
 
