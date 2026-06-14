@@ -46,6 +46,7 @@ class ToolRegistry:
     def all_schemas(self) -> list[dict[str, Any]]:   # all avilable tools with schemas for llm to know which tools what need and how to call them and work
         """Return all tool schemas — useful for passing to the LLM."""
         return [t.schema() for t in self._tools.values()]  # .valuues() only reeurn the value not key
+    
     # schemas = []
     # for t in self._tools.values():
     #    schemas.append(t.schema())
