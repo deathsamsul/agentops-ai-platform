@@ -1,4 +1,6 @@
-from pydantic_settings import BaseSettings, SettingsConfigDict
+from pydantic_settings import BaseSettings, SettingsConfigDict  
+#pydantic_settings It can automatically read: .env file Environment variables Default values
+
 
 """
 config.py — Centralised settings loaded from environment variables / .env file 
@@ -10,7 +12,7 @@ Usage anywhere in the codebase:
 
 # TODO in phase1, create custom llm for all llm providers to use in the future, and move _get_llm_with_tools() to this file as well, so that we can reuse it across the codebase without importing node.py
 # TODO in phase 3 add google gemini support api key
-class Settings(BaseSettings):
+class Settings(BaseSettings):  # BaseSettings automatically loads configuration.
     # ── LLM ──────────────────────────────────────────────────────────────────
     MODEL_PROVIDER: str = "openai"          # openai | anthropic | ollama  | custom
     OPENAI_API_KEY: str = ""
@@ -31,6 +33,7 @@ class Settings(BaseSettings):
     LOG_LEVEL: str = "INFO"        # DEBUG | INFO | WARNING | ERROR | CRITICAL for debugging and monitoring
     BACKEND_URL: str = "http://localhost:8000"
 
+# to control how settings are loaded. 
     model_config = SettingsConfigDict(      # Pydantic v2 style config Pydantic automatically use internally predefined setting features
         env_file=".env",
         env_file_encoding="utf-8",     # Read the .env file using UTF-8 text encoding
