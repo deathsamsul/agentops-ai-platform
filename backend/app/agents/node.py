@@ -124,7 +124,7 @@ def executor_node(state: AgentState) -> dict[str, Any]:
     Records the result in tool_calls and appends a ToolMessage to history.
     """
     tool_name = state.next_tool
-    tool_input = state.next_tool_input
+    tool_input = state.next_tool_input       # tool schemas 
 
     logger.info("[executor] running tool '%s'", tool_name)
 
@@ -145,7 +145,7 @@ def executor_node(state: AgentState) -> dict[str, Any]:
 
     # Does this tool output require human approval before proceeding?
     requires_approval = result.get("requires_approval", False)
-    approval_token = str(uuid.uuid4()) if requires_approval else None
+    approval_token = str(uuid.uuid4()) if requires_approval else None # if require need then generate 
 
     return {
         "messages": [tool_msg],
@@ -169,7 +169,7 @@ def approval_node(state: AgentState) -> dict[str, Any]:
     # The graph will terminate here and the API returns requires_approval=True.
     # The frontend calls POST /api/approve with the token to resume.
     return {
-        "agent_reply": (
+        "agent_reply": (                                                                      # langgraph autometically update it state 
             "⏸ I need your approval before proceeding. "
             f"Please review the planned action and confirm. (token: {state.approval_token})"
         ),
