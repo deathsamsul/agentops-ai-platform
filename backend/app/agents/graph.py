@@ -46,14 +46,14 @@ def build_graph() -> StateGraph:
     builder.add_node("responder", responder_node)
 
     # ── 3. Entry point ────────────────────────────────────────────────────────
-    builder.set_entry_point("planner")
+    builder.set_entry_point("planner")  # Where should execution begin? Without this LangGraph doesn't know where to start.
 
     # ── 4. Edges from planner ─────────────────────────────────────────────────
-    # Conditional: does planner want to call a tool or reply directly?
+    # unfixd Conditional: does planner want to call a tool or reply directly?
     builder.add_conditional_edges(
         "planner",
         should_continue,
-        {
+        {           # this routing table
             "execute": "executor",   # planner chose a tool
             "end":     "responder",  # planner replied directly
         },
@@ -63,7 +63,7 @@ def build_graph() -> StateGraph:
     builder.add_conditional_edges(
         "executor",
         after_executor,
-        {
+        {     # this routing table
             "approve": "approval",   # tool result needs human sign-off
             "plan":    "planner",    # go back to planner for next tool / reply
             "end":     "responder",  # iteration limit hit
@@ -71,6 +71,7 @@ def build_graph() -> StateGraph:
     )
 
     # ── 6. Terminal edges ─────────────────────────────────────────────────────
+    # fixed unconditional edges to END node (LangGraph automatically creates an END node)
     builder.add_edge("approval",  END)
     builder.add_edge("responder", END)
 
@@ -79,6 +80,6 @@ def build_graph() -> StateGraph:
 
 
 # ─── Singleton compiled graph ─────────────────────────────────────────────────
-# Import this in routes_chat.py:
-#   from app.agents.graph import agent_graph
+#  Import this in routes_chat.py:
+#  from app.agents.graph import agent_graph
 agent_graph = build_graph()
