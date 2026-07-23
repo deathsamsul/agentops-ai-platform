@@ -7,9 +7,7 @@ from app.agents.nodes import (planner_node,executor_node,approval_node,responder
 
 """
 agents/graph.py — LangGraph workflow definition.
-
 This file wires the nodes together into a directed graph:
-
     START
       |
     planner ──(tool chosen)──► executor ──(needs approval)──► approval ──► END
@@ -19,7 +17,6 @@ This file wires the nodes together into a directed graph:
       └──(direct reply)───────────┤
                                   |
                                 responder ──► END
-
 How LangGraph works:
   - Each node is a function: (AgentState) -> dict
   - Edges are either FIXED or CONDITIONAL (decided by a routing function)
@@ -31,7 +28,6 @@ How LangGraph works:
 def build_graph() -> StateGraph:
     """
     Construct and compile the LangGraph agent workflow.
-
     Returns a compiled graph ready to call with:
         graph.invoke({"user_input": "...", "session_id": "..."})
     """
