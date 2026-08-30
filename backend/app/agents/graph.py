@@ -23,7 +23,7 @@ How LangGraph works:
   - State is automatically merged after each node
 """
 
-
+# TODO : add START and end node in graph to make it more clear and easy to understand
 
 def build_graph() -> StateGraph:
     """
@@ -32,19 +32,19 @@ def build_graph() -> StateGraph:
         graph.invoke({"user_input": "...", "session_id": "..."})
     """
 
-    # ── 1. Create graph with our state schema ─────────────────────────────────
+    # ── 1. Create graph with our state schema
     builder = StateGraph(AgentState)
 
-    # ── 2. Register nodes ─────────────────────────────────────────────────────
+    # ── 2. register them as nodes:
     builder.add_node("planner",   planner_node)
     builder.add_node("executor",  executor_node)
     builder.add_node("approval",  approval_node)
     builder.add_node("responder", responder_node)
 
-    # ── 3. Entry point ────────────────────────────────────────────────────────
+    # ── 3. Entry point
     builder.set_entry_point("planner")  # Where should execution begin? Without this LangGraph doesn't know where to start.
 
-    # ── 4. Edges from planner ─────────────────────────────────────────────────
+    # ── 4. Edges from planner An edge tells LangGraph which node should execute next.
     # unfixd Conditional: does planner want to call a tool or reply directly?
     builder.add_conditional_edges(
         "planner",
@@ -55,7 +55,7 @@ def build_graph() -> StateGraph:
         },
     )
 
-    # ── 5. Edges from executor ────────────────────────────────────────────────
+    #  5. Edges from executor 
     builder.add_conditional_edges(
         "executor",
         after_executor,
@@ -66,16 +66,16 @@ def build_graph() -> StateGraph:
         },
     )
 
-    # ── 6. Terminal edges ─────────────────────────────────────────────────────
+    # \ 6. Terminal edges 
     # fixed unconditional edges to END node (LangGraph automatically creates an END node)
     builder.add_edge("approval",  END)
     builder.add_edge("responder", END)
 
-    # ── 7. Compile ────────────────────────────────────────────────────────────
+    # ── 7. Compile 
     return builder.compile()
 
 
-# ─── Singleton compiled graph ─────────────────────────────────────────────────
+#  Singleton compiled graph 
 #  Import this in routes_chat.py:
 #  from app.agents.graph import agent_graph
 agent_graph = build_graph()

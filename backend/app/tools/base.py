@@ -20,7 +20,7 @@ Future MCP upgrade path:
 
 
 
-class BaseTool(ABC):  # ABC = Abstract Base Class, 
+class BaseTool(ABC):  # ABC = Abstract Base Class, you cant create tool =BaseTool() directly because it not implemented
     """
     Every tool MUST define:
       name        — unique snake_case identifier, e.g. "send_email"
@@ -42,7 +42,7 @@ class BaseTool(ABC):  # ABC = Abstract Base Class,
         """
         raise NotImplementedError   # method be written later in subclass, not here
 
-    # ── Convenience helpers ───────────────────────────────────────────────────
+    # ── Convenience helpers 
     def success(self, **kwargs) -> dict[str, Any]:
         """Return a standard success payload."""
         return {"status": "ok", "tool": self.name, **kwargs}

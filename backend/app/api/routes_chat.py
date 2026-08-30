@@ -41,14 +41,18 @@ error = None
 # TODO async function with await if langgraph supports async execution in the future
 # TODO ainvoke should be async final_state = await agent_graph.ainvoke(initial_state)
 
+
+
 logger = logging.getLogger(__name__)   # name means python file name  app.api.routes_chat
 router = APIRouter()
 
+# TODO: Phase 2: replace this in-memory store with PostgreSQL or other persistent database
 # In-memory session store — replace with PostgreSQL in Phase 2
-_sessions: dict[str, list] = {}
+# this not persistent production database ,it only python dictionary memory ,if server restart then all data will gone 
+_sessions: dict[str, list] = {}   # this session refers to all chat history , dict have only two parameter key and value 
 
 
-@router.post("/chat", response_model=ChatResponse)
+@router.post("/chat", response_model=ChatResponse)  # The response from this endpoint should follow the ChatResponse schema
 async def chat(request: ChatRequest) -> ChatResponse:
     """
     Main chat endpoint.
@@ -61,13 +65,13 @@ async def chat(request: ChatRequest) -> ChatResponse:
     logger.info("Chat request: session=%s user=%s msg='%s'",
                 request.session_id, request.user_id, request.message[:80])
 
-    # Build initial state
+    # build initial state
     history = _sessions.get(request.session_id, [])
     initial_state = AgentState(
         messages=history + [HumanMessage(content=request.user_input)],     # HumanMessage represents a message sent by the user/human to an AI model
         session_id=request.session_id,                                     # LangChain stores that as a HumanMessage.
         user_id=request.user_id,
-        user_input=request.message,)
+        user_input=request.message,)   # TODO check needed duplicated 
 
 
     # Run the agent graph

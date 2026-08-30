@@ -19,7 +19,7 @@ Upgrade path:
 # TODO ; if user send message with approval then directly execute task without asking approval again
 # TODO all tools paramter write with better schema with clear instruction This helps LLM understand much better
 
-# ─── Email Tool ───────────────────────────────────────────────────────────────
+# ─── Email Tool
 class EmailTool(BaseTool):
     name = "send_email"
     description = (
@@ -58,7 +58,7 @@ class EmailTool(BaseTool):
         }
 
 
-# ─── Calendar Tool ────────────────────────────────────────────────────────────
+# ─── Calendar Tool 
 class CalendarTool(BaseTool):
     name = "schedule_meeting"
     description = (
@@ -95,7 +95,7 @@ class CalendarTool(BaseTool):
         }
 
 
-# ─── Database / Task Tool ─────────────────────────────────────────────────────
+# ─── Database / Task Tool 
 class DatabaseTool(BaseTool):
     name = "create_task"
     description = (
@@ -130,7 +130,10 @@ class DatabaseTool(BaseTool):
         }
 
 
-# ─── Booking Tool (mock) ──────────────────────────────────────────────────────
+# TODO : make retrieval a tool for vector search and retrieval of documents from database or vector store like pgvector or pinecone
+
+
+# ─── Booking Tool (mock) 
 class BookingTool(BaseTool):
     name = "book_resource"
     description = (
@@ -156,7 +159,7 @@ class BookingTool(BaseTool):
         )
 
 
-# ─── RAG / Document Search Tool ───────────────────────────────────────────────
+# ─── RAG / Document Search Tool 
 class SearchDocsTool(BaseTool):
     name = "search_docs"
     description = (

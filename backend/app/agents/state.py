@@ -24,7 +24,7 @@ class AgentState(BaseModel):
       - plain fields are REPLACED with the new value
     """
 
-    # ---- Conversation ──────────────────────────────────────────────────────────
+    # ---- Conversation
     messages: Annotated[list[BaseMessage], add_messages] = Field(
         default_factory=list,
         description="Full conversation history (LangChain message objects)", )
@@ -33,11 +33,11 @@ class AgentState(BaseModel):
     session_id: str = ""
     user_id: str = "anonymous"
 
-    # ---- Current turn ──────────────────────────────────────────────────────────
+    # ---- Current turn 
     user_input: str = ""
     agent_reply: str = ""
 
-    # ---- Tool tracking ─────────────────────────────────────────────────────────
+    # ---- Tool tracking
     # List of {tool_name, input_data, output, success} dicts
     tool_calls: Annotated[list[dict[str, Any]], add] = Field(default_factory=list)
 
@@ -45,7 +45,7 @@ class AgentState(BaseModel):
     next_tool: str | None = None
     next_tool_input: dict[str, Any] = Field(default_factory=dict)
 
-    # ---- Workflow control ──────────────────────────────────────────────────────
+    # ---- Workflow control 
     # How many tool-calling iterations we've done (guard against infinite loops)
     iteration: int = 0
     max_iterations: int = 10
@@ -55,7 +55,7 @@ class AgentState(BaseModel):
     approval_token: str | None = None
     approved: bool | None = None     # None = waiting, True = approved, False = rejected
 
-    # ---- Error state ───────────────────────────────────────────────────────────
+    # ---- Error state 
     error: str | None = None
 
     class Config:

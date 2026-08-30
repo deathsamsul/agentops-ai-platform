@@ -6,7 +6,7 @@ from typing import Any
 from langchain_core.messages import AIMessage, HumanMessage, ToolMessage
 from app.agents.state import AgentState
 from app.tools.executor import executor
-
+from app.agents.get_llm import _get_llm_with_tools
 
 """
 if if response.tool_calls is empty [] then reply directly 
@@ -28,55 +28,9 @@ Node responsibilities:
 logger = logging.getLogger(__name__)   # set up a logger for this module example  app/agents/nodes.py
 
 
-# ─── Helper: build LLM with tools ────────────────────────────────────────────
-def _get_llm_with_tools():
-    """
-    Returns a LangChain chat model bound to our tool schemas.
-    Supports OpenAI, Anthropic, and Ollama — controlled by config.
-    """
 
-    from app.config import settings
-    tool_schemas = executor.tool_schemas() # get tool schemas from executor to bind to llm so that llm knows which tools are available and how to call them
-    llm = None
-    if settings.MODEL_PROVIDER == "openai":
-        from langchain_openai import ChatOpenAI  
-        llm = ChatOpenAI(
-            model=settings.LLM_MODEL,
-            api_key=settings.OPENAI_API_KEY,
-        )
-    elif settings.MODEL_PROVIDER == "anthropic":
-        from langchain_anthropic import ChatAnthropic
-        llm = ChatAnthropic(
-            model=settings.LLM_MODEL,
-            api_key=settings.ANTHROPIC_API_KEY,
-        )
-    elif settings.MODEL_PROVIDER == "ollama":
-        from langchain_ollama import ChatOllama
-        llm = ChatOllama(
-            model=settings.LLM_MODEL,
-            base_url=settings.OLLAMA_BASE_URL,
-        )
-    else:
-        raise ValueError(f"Unsupported MODEL_PROVIDER: {settings.MODEL_PROVIDER}")
 
-    # Bind tool schemas so the LLM knows what tools it can call
-    return llm.bind_tools(tool_schemas)  # all tools with schemas for llm to know which tools what need and how to call them and work
-'''
-after bind with tools llm object looks like this when you print it in planner_node
-ChatOpenAI(model='gpt-4', temperature=0, api_key='***', 
-llm = {
-    "model": "gpt-4",
-    "can_chat": True,
-    "tools": [
-        {
-            "name": "send_email",
-            "description": "Send email"
-        }
-    ]
-} 
-'''
-
-# ─── Node 1: Planner ( it add llm responce in agent.state.message) ─────────────────────────────────────────────────────────
+#  Node 1: Planner ( it add llm responce in agent.state.message) 
 def planner_node(state: AgentState) -> dict[str, Any]: # Ask LLM: should we reply directly or call a tool?
     """
     Sends conversation history to the LLM.
@@ -115,7 +69,7 @@ def planner_node(state: AgentState) -> dict[str, Any]: # Ask LLM: should we repl
         "next_tool_input": {},}
 
 
-# ─── Node 2: Executor ────────────────────────────────────────────────────────
+# ─── Node 2: Executor 
 # TODO : fix this direectly execute without before approval risk for [send_email,delete_task,restart_deployment,book_resource,create_payment]
 # TODO : use two type tool one for safe execution without approval like [search_docs,get_tasks,get_pods] and one for risky action with approval like [send_email,delete_task,restart_deployment,book_resource,create_payment] and if tool is in risky action list then directly execute without asking approval again if user already approved once in this conversation turn
 def executor_node(state: AgentState) -> dict[str, Any]:
@@ -157,7 +111,7 @@ def executor_node(state: AgentState) -> dict[str, Any]:
     }
 
 
-# ─── Node 3: Approval gate ───────────────────────────────────────────────────
+# ─── Node 3: Approval gate 
 def approval_node(state: AgentState) -> dict[str, Any]:
     """
     Pauses the workflow and signals the frontend that human approval is needed.
@@ -176,7 +130,7 @@ def approval_node(state: AgentState) -> dict[str, Any]:
     }
 
 
-# ─── Node 4: Responder ───────────────────────────────────────────────────────
+#  Node 4: Responder 
 def responder_node(state: AgentState) -> dict[str, Any]:
     """
     Called when the agent has finished all tool calls and needs to produce
@@ -204,7 +158,7 @@ def responder_node(state: AgentState) -> dict[str, Any]:
     }
 
 
-# ─── Routing function (used by graph.py) ─────────────────────────────────────
+# ─── Routing function (used by graph.py) 
 def should_continue(state: AgentState) -> str:
     """
     Decides which node to visit after the planner runs.
@@ -234,7 +188,7 @@ def after_executor(state: AgentState) -> str:
     return "end"
 
 
-# ─── System prompt ────────────────────────────────────────────────────────────
+#  System prompt 
 def _system_prompt() -> str:
     return """You are an Enterprise AI Agent — a powerful assistant that can take actions on behalf of the user.
 

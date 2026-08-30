@@ -1,6 +1,5 @@
 """
 chat_schema.py — Pydantic models for the /chat endpoint.
-
 FastAPI uses these to:
   1. Validate incoming JSON requests.
   2. Serialise outgoing responses.
