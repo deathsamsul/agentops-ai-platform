@@ -28,6 +28,7 @@ langchain-openai>=0.2.0          # for OpenAI / GPT-4o
 langchain-anthropic>=0.2.0       # for Claude
 langchain-ollama>=0.2.0          # for local Ollama models
 
+
 # ── Database (Phase 2) ────────────────────────────────────────────────────────
 # asyncpg>=0.29.0
 # sqlalchemy[asyncio]>=2.0.0

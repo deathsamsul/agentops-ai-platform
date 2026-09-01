@@ -32,6 +32,15 @@ def _get_llm_with_tools():
             model=settings.LLM_MODEL,
             base_url=settings.OLLAMA_BASE_URL,
         )
+
+    elif settings.MODEL_PROVIDER == "gemini":
+        from langchain_google_genai import ChatGoogleGenerativeAI
+        llm = ChatGoogleGenerativeAI( 
+            model=settings.LLM_MODEL,
+            google_api_key=settings.GEMINI_API_KEY,
+            
+            )
+    
     else:
         raise ValueError(f"Unsupported MODEL_PROVIDER: {settings.MODEL_PROVIDER}")
 
