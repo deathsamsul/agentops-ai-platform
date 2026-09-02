@@ -1,5 +1,5 @@
 from __future__ import annotations
-from langgraph.graph import StateGraph, END
+from langgraph.graph import StateGraph, START, END
 from app.agents.state import AgentState
 from app.agents.nodes import (planner_node,executor_node,approval_node,responder_node,should_continue,after_executor,)
 
@@ -42,7 +42,7 @@ def build_graph() -> StateGraph:
     builder.add_node("responder", responder_node)
 
     # ── 3. Entry point
-    builder.set_entry_point("planner")  # Where should execution begin? Without this LangGraph doesn't know where to start.
+    builder.add_edge(START, "planner")  # Where should execution begin? LangGraph uses explicit START anchors.
 
     # ── 4. Edges from planner An edge tells LangGraph which node should execute next.
     # unfixd Conditional: does planner want to call a tool or reply directly?
